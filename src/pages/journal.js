@@ -41,6 +41,12 @@ const Journal = () => {
 
     //decipher when implemented
     const resultsFromBuffer = decodedInfo.toString();
+    if (resultsFromBuffer === '') {
+      setSecretKey(null);
+      setHasLoadedJournalEntries(false);
+      setJournalEntries([]);
+      return;
+    }
     const withoutExtension = entry.slice(0,entry.length-4)
     setSelectedFileName(withoutExtension);
     setTitleValue(withoutExtension);
