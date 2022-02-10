@@ -1,38 +1,237 @@
-.App {
+/* reset css */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+body, html {
+  width: 100vw;
+  height: 100%;
+  display: flex;
+  flex: 1;
+}
+
+.App, #root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+h1 {
+  width: 100%;
+  background-color: lightblue;
+  margin: 0;
+  padding: 0;
+}
+
+.journal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex: 1;
+}
+
+.entries {
+  width: 300px;
+  background-color: lightgray;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.current-entry {
+  flex: 1;
+  border-left: 1px solid gray;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 1;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.modal-info {
+  width: 50%;
+  height: 50%;
+  min-width: 300px;
+  min-height: 300px;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.modal-info input {
+  margin: 15px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.modal-input button {
+  margin-bottom: 10px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+
+
+h1 {
+  font-size: 35px;
+  padding: 20px;
+  font-weight: bold;
+}
+
+.entries {
+  padding: 20px;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.entries button {
+  margin: 13px 0px;
+  background: white;
+  border-radius: 3px;
+  border: none;
+  padding: 5px;
+}
+
+.entries button:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px black;
+
+}
+
+.entries li {
+  padding: 10px 0px;
+  border-bottom: 1px solid gray;
+}
+
+.entries li:hover {
+  cursor: pointer;
+}
+
+.current-entry {
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.current-entry h2 {
+  margin-bottom: 15px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.current-entry .entry-info, .current-entry form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.current-entry form {
+  margin-bottom: 15px;
+}
+.new-entry-button {
+  background-color: lightblue;
+  padding: 5px;
+  width: 100px;
+  border: none;
+  border-radius: 3px;
+  margin-top: 5px;
+  margin-bottom: 25px;
+}
+
+.new-entry-button:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px gray;
+}
+
+.current-entry label {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.current-entry input {
+  width: 50%;
+  max-width: 300px;
+}
+
+.label-for-entry {
+  display: flex;
+  margin-bottom: 25px;
+}
+
+.current-entry textarea {
+  height: 100%;
+}
+
+.current-entry form button {
+  border: none;
+  padding: 5px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  background-color: lightblue;
+}
+
+.current-entry form button:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px gray;
+}
+
+.verification-text {
+  height: 30px;
+  font-weight: bold;
+  font-size: 15px;
+  width: 100%;
 }
