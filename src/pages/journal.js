@@ -169,9 +169,9 @@ const Journal = () => {
               <div className="label-for-entry">
                 <input type="text" name="entry-title" value={titleValue} onChange={e => setTitleValue(e.target.value)} required />
               </div>
-              {fileIsSelected && <div>
-                Creation Time: {selectedFile.creationDateTime}
-                Last Saved Time: {selectedFile.lastModifiedDateTime}
+              {fileIsSelected && <div className="dateTimes">
+                <p><strong>Creation Time:</strong> {selectedFile.creationDateTime}</p>
+                <p><strong>Last Saved Time:</strong> {selectedFile.lastModifiedDateTime}</p>
               </div>
 }
             <textarea onChange={e => setJournalEntryTextValue(e.target.value)} value={journalEntryTextValue} required />

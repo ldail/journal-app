@@ -235,3 +235,12 @@ h2 {
   font-size: 15px;
   width: 100%;
 }
+
+.dateTimes {
+  display: flex;
+  flex-direction: column;
+}
+
+strong {
+  font-weight: bold;
+}
