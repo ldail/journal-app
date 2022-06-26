@@ -21,7 +21,13 @@ const Journal = () => {
     const results = await fetch(url);
     const transformedResults = await results.json();
     // sort when implemented
-    setJournalEntries(transformedResults);
+    console.log(transformedResults);
+    const bytesMap = transformedResults.map(result => {
+      const byte = cryptojs.AES.decrypt(result, secretKey);
+      return byte.toString(cryptojs.enc.Utf8);
+    });
+    console.log(bytesMap);
+    setJournalEntries(bytesMap);
     setHasLoadedJournalEntries(true);
     return transformedResults;
   }
@@ -67,7 +73,7 @@ const Journal = () => {
     let url = `${REACT_APP_SERVER_URL}/entries`;
     let method = 'POST';
     const reqBody = {
-      title: titleValue,
+      title: cryptojs.AES.encrypt(titleValue, secretKey).toString(),
       entryText: cryptojs.AES.encrypt(journalEntryText, secretKey).toString()
     };
     if (selectedFileName === titleValue) {
