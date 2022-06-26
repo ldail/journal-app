@@ -10,9 +10,9 @@ const Journal = () => {
   const [secretKey, setSecretKey] = useState(null);
   const [hasLoadedJournalEntries, setHasLoadedJournalEntries] = useState(false);
   const [journalEntries, setJournalEntries] = useState([]);
-  const [selectedFileName, setSelectedFileName] = useState(null);
+  const [selectedFile, setSelectedFile] = useState({});
   const [titleValue, setTitleValue] = useState('');
-  const [journalEntryText, setJournalEntryText] = useState('');
+  const [journalEntryTextValue, setJournalEntryTextValue] = useState('');
   const [submittedVerification, setSubmittedVerification] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -22,41 +22,53 @@ const Journal = () => {
     const transformedResults = await results.json();
     // sort when implemented
     console.log(transformedResults);
-    const bytesMap = transformedResults.map(result => {
-      const byte = cryptojs.AES.decrypt(result, secretKey);
-      return byte.toString(cryptojs.enc.Utf8);
-    });
-    console.log(bytesMap);
-    setJournalEntries(bytesMap);
+    const decodedResults = transformedResults.map(result => {
+      const journalEntryInfo = result[1].split(',');
+      console.log(journalEntryInfo);
+      const info = journalEntryInfo.map(item => {
+        console.log(item);
+        const decrypted = cryptojs.AES.decrypt(item, secretKey).toString(cryptojs.enc.Utf8);
+        console.log(decrypted);
+        return decrypted;
+      });
+      return [result[0], info];
+    })
+    console.log(decodedResults);
+    setJournalEntries(decodedResults);
     setHasLoadedJournalEntries(true);
     return transformedResults;
   }
 
   const startNewEntry = () => {
-    setSelectedFileName(null);
+    setSelectedFile({});
     setTitleValue('');
-    setJournalEntryText('');
+    setJournalEntryTextValue('');
   }
 
-  const readEntry = async (entry) => {
-    const url = `${REACT_APP_SERVER_URL}/entries/${entry}`;
+  const readEntry = async (fileName) => {
+    const url = `${REACT_APP_SERVER_URL}/entries/${fileName}`;
     const results = await fetch(url);
     const transformedResults = await results.json();
-    const bytes = cryptojs.AES.decrypt(transformedResults, secretKey);
-    const decodedInfo = bytes.toString(cryptojs.enc.Utf8);
+    const [resultFileName, resultCreationDateTime, resultLastModifiedDateTime, resultSavedJournalEntryText] = transformedResults.split(',');
+    const realFileNameDecoded = cryptojs.AES.decrypt(resultFileName, secretKey).toString(cryptojs.enc.Utf8).toString();
+    const creationDateTimeDecoded = cryptojs.AES.decrypt(resultCreationDateTime, secretKey).toString(cryptojs.enc.Utf8).toString();
+    const lastModifiedDateTimeDecoded = cryptojs.AES.decrypt(resultLastModifiedDateTime, secretKey).toString(cryptojs.enc.Utf8).toString();
+    const savedJournalEntryTextDecoded = cryptojs.AES.decrypt(resultSavedJournalEntryText, secretKey).toString(cryptojs.enc.Utf8).toString();
+    const fileInfo = {
+      realFileName: realFileNameDecoded,
+      creationDateTime: creationDateTimeDecoded,
+      lastModifiedDateTime: lastModifiedDateTimeDecoded,
+      journalEntryText: savedJournalEntryTextDecoded
+    };
 
     //decipher when implemented
-    const resultsFromBuffer = decodedInfo.toString();
-    if (resultsFromBuffer === '') {
+    if (realFileNameDecoded === '' || creationDateTimeDecoded === '' || lastModifiedDateTimeDecoded === '' || savedJournalEntryTextDecoded === '') {
       setSecretKey(null);
       setHasLoadedJournalEntries(false);
       setJournalEntries([]);
       return;
     }
-    const withoutExtension = entry.slice(0,entry.length-4)
-    setSelectedFileName(withoutExtension);
-    setTitleValue(withoutExtension);
-    setJournalEntryText(resultsFromBuffer);
+    setSelectedFile(fileInfo);
   }
 
   const handleSubmitEntry = async (e, acceptedModal) => {
@@ -65,18 +77,21 @@ const Journal = () => {
     const journalEntries = await getJournalEntries();
 
     //Check if this will override old titles
-    const isCurrentEntryInList = journalEntries.find(fileName => fileName === `${titleValue}.txt`);
+    const isCurrentEntryInList = journalEntries.find(fileName => fileName[0] === `${titleValue}`);
     if (isCurrentEntryInList && !acceptedModal) {
       setShowModal(true);
       return;
     }
     let url = `${REACT_APP_SERVER_URL}/entries`;
     let method = 'POST';
-    const reqBody = {
-      title: cryptojs.AES.encrypt(titleValue, secretKey).toString(),
-      entryText: cryptojs.AES.encrypt(journalEntryText, secretKey).toString()
-    };
-    if (selectedFileName === titleValue) {
+    const currentDateTime = (new Date()).toString();
+    const fullBody = [
+      cryptojs.AES.encrypt(titleValue, secretKey).toString(),
+      cryptojs.AES.encrypt(currentDateTime, secretKey).toString(),
+      cryptojs.AES.encrypt(currentDateTime, secretKey).toString(),
+      cryptojs.AES.encrypt(journalEntryTextValue, secretKey).toString(),
+    ];
+    if (selectedFile.realFileNameDecoded === titleValue) {
       url = `${REACT_APP_SERVER_URL}/entries/${titleValue}`;
       method = 'PUT';
     }
@@ -85,13 +100,13 @@ const Journal = () => {
         'Content-Type': 'application/json'
       },
       method,
-      body: JSON.stringify(reqBody)
+      body: JSON.stringify(fullBody)
     });
     const transformedResults = await results.json();
     if (!transformedResults?.error) {
       setSubmittedVerification('Submitted');
       startNewEntry();
-      await getJournalEntries();
+      getJournalEntries();
     }
     else {
       setSubmittedVerification('error');
@@ -115,6 +130,8 @@ const Journal = () => {
     }
   }, [submittedVerification]);
 
+  const fileIsSelected = !!Object.keys(selectedFile).length
+
   return (
     <div className="journal">
     {!secretKey
@@ -125,24 +142,25 @@ const Journal = () => {
     <div className="entries">
       <h2>Journal Entries</h2>
       <button onClick={getJournalEntries}>Get journal entries</button>
-      <ul>
-        {journalEntries.map(fileName => <li key={fileName} onClick={() => readEntry(fileName)}>{fileName}</li> )}
-      </ul>
+      {!!journalEntries.length && 
+        <ul>
+          {journalEntries.map(file => <li key={file[0]} onClick={() => readEntry(file[0])}>{file[1]}</li> )}
+        </ul>
+      }
     </div>
     }
     <div className="current-entry">
       {hasLoadedJournalEntries &&
       <>
-        <h2>{selectedFileName ? `Editing Entry: ${selectedFileName}` : 'New Entry'}</h2>
-        {selectedFileName &&
+        <h2>{fileIsSelected ? `Editing Entry: ${selectedFile.realFileName}` : 'New Entry'}</h2>
+        {fileIsSelected &&
           <button className="new-entry-button" type="button" onClick={startNewEntry}>New Entry</button>}
           <form onSubmit={(e) => handleSubmitEntry(e)}>
               <label htmlFor="entry-title">Entry title:</label>
               <div className="label-for-entry">
                 <input type="text" name="entry-title" value={titleValue} onChange={e => setTitleValue(e.target.value)} required />
-                <span>.txt</span>
               </div>
-            <textarea onChange={e => setJournalEntryText(e.target.value)} value={journalEntryText} required />
+            <textarea onChange={e => setJournalEntryTextValue(e.target.value)} value={journalEntryTextValue} required />
             <button type="submit">Submit entry</button>
           </form>
           <div className="verification-text" style={{backgroundColor: submittedVerification ? 'yellow' : 'white'}}>{submittedVerification}</div>
