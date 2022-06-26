@@ -36,7 +36,7 @@ const Journal = () => {
     console.log(decodedResults);
     setJournalEntries(decodedResults);
     setHasLoadedJournalEntries(true);
-    return transformedResults;
+    return decodedResults;
   }
 
   const startNewEntry = () => {
@@ -79,7 +79,14 @@ const Journal = () => {
     const journalEntries = await getJournalEntries();
 
     //Check if this will override old titles
-    const isCurrentEntryInList = journalEntries.find(fileName => fileName[0] === `${titleValue}`);
+    console.log('submitting entry');
+    const isCurrentEntryInList = journalEntries.find(file => {
+      console.log(file);
+      console.log(file[1][0])
+      console.log(titleValue)
+      return file[1][0] === titleValue
+    });
+    console.log("skipped the find???")
     if (isCurrentEntryInList && !acceptedModal) {
       setShowModal(true);
       return;
