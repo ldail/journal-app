@@ -69,6 +69,8 @@ const Journal = () => {
       return;
     }
     setSelectedFile(fileInfo);
+    setTitleValue(fileInfo.realFileName);
+    setJournalEntryTextValue(fileInfo.journalEntryText)
   }
 
   const handleSubmitEntry = async (e, acceptedModal) => {
@@ -144,7 +146,7 @@ const Journal = () => {
       <button onClick={getJournalEntries}>Get journal entries</button>
       {!!journalEntries.length && 
         <ul>
-          {journalEntries.map(file => <li key={file[0]} onClick={() => readEntry(file[0])}>{file[1]}</li> )}
+          {journalEntries.map(file => <li key={file[0]} onClick={() => readEntry(file[0])}>{file[1][0]}</li> )}
         </ul>
       }
     </div>
@@ -152,7 +154,7 @@ const Journal = () => {
     <div className="current-entry">
       {hasLoadedJournalEntries &&
       <>
-        <h2>{fileIsSelected ? `Editing Entry: ${selectedFile.realFileName}` : 'New Entry'}</h2>
+        <h2>{fileIsSelected ? `Editing Entry: ${titleValue}` : 'New Entry'}</h2>
         {fileIsSelected &&
           <button className="new-entry-button" type="button" onClick={startNewEntry}>New Entry</button>}
           <form onSubmit={(e) => handleSubmitEntry(e)}>
@@ -160,6 +162,11 @@ const Journal = () => {
               <div className="label-for-entry">
                 <input type="text" name="entry-title" value={titleValue} onChange={e => setTitleValue(e.target.value)} required />
               </div>
+              {fileIsSelected && <div>
+                Creation Time: {selectedFile.creationDateTime}
+                Last Saved Time: {selectedFile.lastModifiedDateTime}
+              </div>
+}
             <textarea onChange={e => setJournalEntryTextValue(e.target.value)} value={journalEntryTextValue} required />
             <button type="submit">Submit entry</button>
           </form>
